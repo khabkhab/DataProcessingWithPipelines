@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.pipeline import Pipeline
 import matplotlib.pyplot as plt
-import geopandas
+import geopandas as gpd
 
 
 #drops the first column that has no name and delete rows where "NaN" is present
@@ -20,12 +20,20 @@ class GroupBy(BaseEstimator, TransformerMixin):
     def transform(self, X):
         X = X.groupby('Country Name').sum()
         return X
+#adds column with total debt
+class AddTotal(BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self
+    def transform(self, X):
+        X['Total'] = X.iloc[:,1:].sum(axis=1)
+        return X
     
-#combining pipeline 
+#combining pipeline; 3 in total
 pipe = Pipeline([
     ("dropper", DropNames()),
-    ("groupper", GroupBy()) 
-])   
+    ("groupper", GroupBy()),
+    ("totalization", AddTotal()) 
+])
 if __name__ == "__main__":
     data = pd.read_csv("ids_last_5y.csv")
     df = pd.DataFrame(data)
